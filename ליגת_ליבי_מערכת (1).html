@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ליגת ליבי 2025–2026 | מערכת ניהול</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Heebo', sans-serif; background: #0b1520; color: #e8edf5; direction: rtl; min-height: 100vh; overflow-x: hidden; }
+#root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ===== DATA =====
+const NORTH_TABLE = [
+  { rank: 1, name: 'ידרסל חדרה', games: 7, wins: 6, losses: 1, pf: 416, pa: 310, diff: 106, techni: 0, pts: 12 },
+  { rank: 2, name: 'חולון', games: 7, wins: 5, losses: 2, pf: 423, pa: 382, diff: 41, techni: 0, pts: 11 },
+  { rank: 3, name: 'בני נתניה', games: 7, wins: 4, losses: 3, pf: 374, pa: 369, diff: 5, techni: 0, pts: 10 },
+  { rank: 4, name: 'גוטלמן השרון', games: 7, wins: 4, losses: 3, pf: 381, pa: 359, diff: 22, techni: 0, pts: 9 },
+  { rank: 5, name: 'בני מוצקין', games: 6, wins: 3, losses: 3, pf: 362, pa: 325, diff: 37, techni: 0, pts: 7 },
+  { rank: 6, name: 'כ.ע. בת-ים', games: 7, wins: 2, losses: 3, pf: 287, pa: 343, diff: -56, techni: 2, pts: 5 },
+  { rank: 7, name: 'גלי בת-ים', games: 7, wins: 0, losses: 5, pf: 212, pa: 367, diff: -155, techni: 2, pts: 4 },
+];
+
+const SOUTH_TABLE = [
+  { rank: 1, name: 'ראשון "גפן" לציון', games: 8, wins: 6, losses: 2, pf: 589, pa: 463, diff: 126, techni: 0, pts: 14 },
+  { rank: 2, name: 'אחים קריית משה', games: 8, wins: 5, losses: 3, pf: 497, pa: 491, diff: 6, techni: 0, pts: 13 },
+  { rank: 3, name: 'קריית מלאכי', games: 8, wins: 5, losses: 3, pf: 473, pa: 495, diff: -22, techni: 0, pts: 13 },
+  { rank: 4, name: 'אוריה ירושלים', games: 8, wins: 6, losses: 2, pf: 540, pa: 478, diff: 62, techni: 0, pts: 12 },
+  { rank: 5, name: 'אופק רחובות', games: 8, wins: 4, losses: 4, pf: 471, pa: 430, diff: 41, techni: 0, pts: 12 },
+  { rank: 6, name: 'אריות קריית גת', games: 8, wins: 4, losses: 4, pf: 451, pa: 442, diff: 9, techni: 0, pts: 12 },
+  { rank: 7, name: 'אדיס אשדוד', games: 8, wins: 2, losses: 6, pf: 508, pa: 515, diff: -7, techni: 0, pts: 9 },
+  { rank: 8, name: "החבר'ה הטובים גדרה", games: 8, wins: 0, losses: 6, pf: 251, pa: 466, diff: -215, techni: 2, pts: 5 },
+];
+
+const GAMES = [
+  { round: 1, date: '01.11.25', home: 'ידרסל חדרה', away: 'בני נתניה', sh: 54, sa: 57, techni: '' },
+  { round: 1, date: '01.11.25', home: 'כ.ע. בת-ים', away: 'גלי בת-ים', sh: 49, sa: 46, techni: '' },
+  { round: 1, date: '01.11.25', home: 'גוטלמן השרון', away: 'חולון', sh: 51, sa: 59, techni: '' },
+  { round: 1, date: '01.11.25', home: 'אדיס אשדוד', away: 'קריית מלאכי', sh: 50, sa: 52, techni: '' },
+  { round: 1, date: '01.11.25', home: "החבר'ה הטובים גדרה", away: 'אריות קריית גת', sh: 0, sa: 20, techni: 'טכני לגדרה' },
+  { round: 1, date: '01.11.25', home: 'אחים קריית משה', away: 'ראשון "גפן" לציון', sh: 64, sa: 72, techni: '' },
+  { round: 1, date: '01.11.25', home: 'אוריה ירושלים', away: 'אופק רחובות', sh: 64, sa: 47, techni: '' },
+  { round: 2, date: '08.11.25', home: 'בני מוצקין', away: 'ידרסל חדרה', sh: 43, sa: 50, techni: '' },
+  { round: 2, date: '08.11.25', home: 'גלי בת-ים', away: 'גוטלמן השרון', sh: 54, sa: 61, techni: '' },
+  { round: 2, date: '08.11.25', home: 'כ.ע. בת-ים', away: 'בני נתניה', sh: 58, sa: 64, techni: '' },
+  { round: 2, date: '08.11.25', home: 'אוריה ירושלים', away: 'אדיס אשדוד', sh: 59, sa: 50, techni: '' },
+  { round: 2, date: '08.11.25', home: 'אופק רחובות', away: 'קריית מלאכי', sh: 39, sa: 57, techni: '' },
+  { round: 2, date: '08.11.25', home: "החבר'ה הטובים גדרה", away: 'ראשון "גפן" לציון', sh: 39, sa: 54, techni: '' },
+  { round: 2, date: '08.11.25', home: 'אריות קריית גת', away: 'אחים קריית משה', sh: 67, sa: 68, techni: '' },
+  { round: 3, date: '29.11.25', home: 'בני נתניה', away: 'בני מוצקין', sh: 60, sa: 61, techni: '' },
+  { round: 3, date: '29.11.25', home: 'גלי בת-ים', away: 'חולון', sh: 0, sa: 20, techni: 'טכני לגלי' },
+  { round: 3, date: '29.11.25', home: 'גוטלמן השרון', away: 'כ.ע. בת-ים', sh: 20, sa: 0, techni: 'טכני לכח עולה' },
+  { round: 3, date: '29.11.25', home: 'אדיס אשדוד', away: "החבר'ה הטובים גדרה", sh: 74, sa: 42, techni: '' },
+  { round: 3, date: '29.11.25', home: 'קריית מלאכי', away: 'אוריה ירושלים', sh: 65, sa: 64, techni: '' },
+  { round: 3, date: '29.11.25', home: 'ראשון "גפן" לציון', away: 'אריות קריית גת', sh: 64, sa: 53, techni: '' },
+  { round: 3, date: '29.11.25', home: 'אופק רחובות', away: 'אחים קריית משה', sh: 67, sa: 68, techni: '' },
+  { round: 4, date: '20.12.25', home: 'חולון', away: 'כ.ע. בת-ים', sh: 75, sa: 57, techni: '' },
+  { round: 4, date: '20.12.25', home: 'בני מוצקין', away: 'גוטלמן השרון', sh: 53, sa: 63, techni: '' },
+  { round: 4, date: '20.12.25', home: 'ידרסל חדרה', away: 'גלי בת-ים', sh: 65, sa: 20, techni: '' },
+  { round: 4, date: '20.12.25', home: 'קריית מלאכי', away: "החבר'ה הטובים גדרה", sh: 76, sa: 49, techni: '' },
+  { round: 4, date: '20.12.25', home: 'אריות קריית גת', away: 'אדיס אשדוד', sh: 64, sa: 56, techni: '' },
+  { round: 4, date: '20.12.25', home: 'אחים קריית משה', away: 'אוריה ירושלים', sh: 78, sa: 80, techni: '' },
+  { round: 4, date: '20.12.25', home: 'ראשון "גפן" לציון', away: 'אופק רחובות', sh: 70, sa: 54, techni: '' },
+  { round: 5, date: '10.01.26', home: 'חולון', away: 'בני מוצקין', sh: 57, sa: 55, techni: '' },
+  { round: 5, date: '10.01.26', home: 'גוטלמן השרון', away: 'ידרסל חדרה', sh: 64, sa: 72, techni: '' },
+  { round: 5, date: '10.01.26', home: 'בני נתניה', away: 'גלי בת-ים', sh: 20, sa: 0, techni: 'טכני לגלי' },
+  { round: 5, date: '10.01.26', home: 'אדיס אשדוד', away: 'אחים קריית משה', sh: 74, sa: 76, techni: '' },
+  { round: 5, date: '10.01.26', home: 'אוריה ירושלים', away: 'ראשון "גפן" לציון', sh: 72, sa: 70, techni: '' },
+  { round: 5, date: '10.01.26', home: 'אופק רחובות', away: "החבר'ה הטובים גדרה", sh: 72, sa: 27, techni: '' },
+  { round: 5, date: '10.01.26', home: 'אריות קריית גת', away: 'קריית מלאכי', sh: 60, sa: 56, techni: '' },
+  { round: 6, date: '24.01.26', home: 'חולון', away: 'ידרסל חדרה', sh: 66, sa: 85, techni: '' },
+  { round: 6, date: '24.01.26', home: 'גוטלמן השרון', away: 'בני נתניה', sh: 50, sa: 51, techni: '' },
+  { round: 6, date: '24.01.26', home: 'כ.ע. בת-ים', away: 'בני מוצקין', sh: 54, sa: 67, techni: '' },
+  { round: 6, date: '24.01.26', home: 'קריית מלאכי', away: 'אחים קריית משה', sh: 55, sa: 63, techni: '' },
+  { round: 6, date: '24.01.26', home: 'אופק רחובות', away: 'אריות קריית גת', sh: 76, sa: 51, techni: '' },
+  { round: 6, date: '24.01.26', home: 'ראשון "גפן" לציון', away: 'אדיס אשדוד', sh: 84, sa: 87, techni: '' },
+  { round: 6, date: '24.01.26', home: "החבר'ה הטובים גדרה", away: 'אוריה ירושלים', sh: 45, sa: 81, techni: '' },
+  { round: 7, date: '25.01.26', home: 'חולון', away: 'בני נתניה', sh: 76, sa: 62, techni: '' },
+  { round: 7, date: '25.01.26', home: 'ידרסל חדרה', away: 'כ.ע. בת-ים', sh: 20, sa: 0, techni: 'טכני לכ.ע.' },
+  { round: 7, date: '25.01.26', home: 'גלי בת-ים', away: 'בני מוצקין', sh: 41, sa: 83, techni: '' },
+  { round: 7, date: '25.01.26', home: 'אחים קריית משה', away: "החבר'ה הטובים גדרה", sh: 20, sa: 0, techni: 'טכני לגדרה' },
+  { round: 7, date: '25.01.26', home: 'אדיס אשדוד', away: 'אופק רחובות', sh: 46, sa: 60, techni: '' },
+  { round: 7, date: '25.01.26', home: 'ראשון "גפן" לציון', away: 'קריית מלאכי', sh: 99, sa: 34, techni: '' },
+  { round: 7, date: '25.01.26', home: 'אוריה ירושלים', away: 'אריות קריית גת', sh: 73, sa: 67, techni: '' },
+  { round: 8, date: '21.02.26', home: 'חולון', away: 'גוטלמן השרון', sh: 70, sa: 72, techni: '' },
+  { round: 8, date: '21.02.26', home: 'גלי בת-ים', away: 'כ.ע. בת-ים', sh: 51, sa: 69, techni: '' },
+  { round: 8, date: '21.02.26', home: 'בני נתניה', away: 'ידרסל חדרה', sh: 60, sa: 70, techni: '' },
+  { round: 8, date: '21.02.26', home: 'קריית מלאכי', away: 'אדיס אשדוד', sh: 78, sa: 71, techni: '' },
+  { round: 8, date: '21.02.26', home: 'ראשון "גפן" לציון', away: 'אחים קריית משה', sh: 76, sa: 60, techni: '' },
+  { round: 8, date: '21.02.26', home: 'אריות קריית גת', away: "החבר'ה הטובים גדרה", sh: 69, sa: 49, techni: '' },
+  { round: 8, date: '21.02.26', home: 'אופק רחובות', away: 'אוריה ירושלים', sh: 56, sa: 47, techni: '' },
+];
+
+const UPCOMING = [
+  { round: 9, date: '28.02.26', home: 'ידרסל חדרה', away: 'בני מוצקין', div: 'צפון' },
+  { round: 9, date: '28.02.26', home: 'גוטלמן השרון', away: 'גלי בת-ים', div: 'צפון' },
+  { round: 9, date: '28.02.26', home: 'בני נתניה', away: 'כ.ע. בת-ים', div: 'צפון' },
+  { round: 9, date: '28.02.26', home: 'אדיס אשדוד', away: 'אוריה ירושלים', div: 'דרום' },
+  { round: 9, date: '28.02.26', home: 'קריית מלאכי', away: 'אופק רחובות', div: 'דרום' },
+  { round: 9, date: '28.02.26', home: 'ראשון "גפן" לציון', away: "החבר'ה הטובים גדרה", div: 'דרום' },
+  { round: 9, date: '28.02.26', home: 'אחים קריית משה', away: 'אריות קריית גת', div: 'דרום' },
+];
+
+const CUP_ROUNDS = [
+  {
+    stage: 'שמינית גמר', date: '22.11.25',
+    matches: [
+      { home: 'גלי בת-ים', sh: 66, away: 'גוטלמן השרון', sa: 75 },
+      { home: 'ידרסל חדרה', sh: 65, away: "ה.ה. גדרה", sa: 40 },
+      { home: 'אוריה ירושלים', sh: 56, away: 'א.ט. ק. גת', sa: 55 },
+      { home: 'חולון', sh: 61, away: 'אופק רחובות', sa: 54 },
+      { home: 'בני נתניה', sh: 63, away: 'אדיס אשדוד', sa: 49 },
+      { home: 'קריית מלאכי', sh: 20, away: 'בני מוצקין', sa: 0, techni: true },
+      { home: 'ראשון "גפן" לציון', sh: 20, away: 'כ.ע. בת-ים', sa: 0, techni: true },
+    ]
+  },
+  {
+    stage: 'רבע גמר', date: '13.12.25',
+    matches: [
+      { home: 'ראשון "גפן" לציון', sh: 73, away: 'אחים ק. משה', sa: 65 },
+      { home: 'ק. מלאכי', sh: 67, away: 'אוריה ירושלים', sa: 77 },
+      { home: 'חולון', sh: 43, away: 'בני נתניה', sa: 64 },
+      { home: 'ידרסל חדרה', sh: 38, away: 'גוטלמן השרון', sa: 57 },
+    ]
+  },
+  {
+    stage: 'חצי גמר', date: '03.01.26',
+    matches: [
+      { home: 'אוריה ירושלים', sh: 67, away: 'גוטלמן השרון', sa: 79 },
+      { home: 'בני נתניה', sh: 55, away: 'ראשון "גפן" לציון', sa: 68 },
+    ]
+  },
+  {
+    stage: 'גמר', date: '21.03.26',
+    matches: [
+      { home: 'ראשון "גפן" לציון', sh: null, away: 'גוטלמן השרון', sa: null, upcoming: true },
+    ]
+  },
+];
+
+// ===== STYLES =====
+const S = {
+  app: { minHeight: '100vh', background: '#0b1520' },
+  sidebar: {
+    position: 'fixed', top: 0, right: 0, bottom: 0, width: 220,
+    background: 'linear-gradient(180deg, #0f1e30 0%, #0b1520 100%)',
+    borderLeft: '1px solid rgba(255,255,255,0.06)',
+    zIndex: 100, display: 'flex', flexDirection: 'column',
+    padding: '0 0 24px 0',
+  },
+  logo: {
+    padding: '24px 20px 20px',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    marginBottom: 8,
+  },
+  logoTitle: { fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1.2 },
+  logoSub: { fontSize: 11, color: '#5a7a9a', marginTop: 4, letterSpacing: 1 },
+  navItem: (active) => ({
+    display: 'flex', alignItems: 'center', gap: 10,
+    padding: '11px 20px', cursor: 'pointer', fontSize: 14, fontWeight: 500,
+    color: active ? '#fff' : '#6b8aaa',
+    background: active ? 'linear-gradient(90deg, rgba(255,107,26,0.18), rgba(255,107,26,0.04))' : 'transparent',
+    borderRight: active ? '3px solid #FF6B1A' : '3px solid transparent',
+    transition: 'all 0.2s', borderRadius: '0 0 0 8px',
+    userSelect: 'none',
+  }),
+  navIcon: { fontSize: 16, width: 22, textAlign: 'center' },
+  main: { marginRight: 220, minHeight: '100vh', padding: '32px 32px 40px' },
+  pageTitle: { fontSize: 28, fontWeight: 900, color: '#fff', marginBottom: 4 },
+  pageSub: { fontSize: 13, color: '#5a7a9a', marginBottom: 28 },
+  card: {
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 16, overflow: 'hidden',
+  },
+  cardHeader: {
+    padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+    fontSize: 15, fontWeight: 700, color: '#e0c97a',
+    display: 'flex', alignItems: 'center', gap: 8,
+  },
+  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 },
+  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 },
+  grid4: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14 },
+};
+
+// ===== COMPONENTS =====
+function StatPill({ value, label, color = '#FF6B1A', icon }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '18px 20px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${color}, transparent)` }} />
+      <div style={{ fontSize: 11, color: '#5a7a9a', fontWeight: 600, letterSpacing: 0.5, marginBottom: 6 }}>{icon} {label}</div>
+      <div style={{ fontSize: 28, fontWeight: 900, color, lineHeight: 1 }}>{value}</div>
+    </div>
+  );
+}
+
+function TableView({ data, title, icon }) {
+  return (
+    <div style={S.card}>
+      <div style={S.cardHeader}>{icon} {title}</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+            {['#','קבוצה','מ\'','נ\'','ה\'','זכות','חובה','+/-','טכ','נקודות'].map(h => (
+              <th key={h} style={{ padding: '9px 12px', color: '#4a6a8a', fontWeight: 600, fontSize: 11, textAlign: h === 'קבוצה' ? 'right' : 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((t, i) => (
+            <tr key={t.name} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,107,26,0.06)'}
+              onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)'}
+            >
+              <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontWeight: 700, color: t.rank === 1 ? '#e0c97a' : t.rank === 2 ? '#b0b8c8' : t.rank === 3 ? '#c87d3a' : '#4a6a8a', fontSize: 14 }}>{t.rank}</span>
+              </td>
+              <td style={{ padding: '10px 12px', fontWeight: 600, color: '#e8edf5' }}>{t.name}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#8aaac8' }}>{t.games}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#4ec97a', fontWeight: 600 }}>{t.wins}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e05a5a', fontWeight: 600 }}>{t.losses}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#8aaac8' }}>{t.pf}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#8aaac8' }}>{t.pa}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: t.diff > 0 ? '#4ec97a' : '#e05a5a', fontWeight: 600 }}>{t.diff > 0 ? '+' : ''}{t.diff}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', color: '#e05a5a' }}>{t.techni > 0 ? `-${t.techni}` : '–'}</td>
+              <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 900, color: '#FF6B1A', fontSize: 15 }}>{t.pts}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ padding: '8px 14px', fontSize: 10, color: '#3a5a7a', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        * הורדת נקודות על אי הגעה לגמר אליפות / מפגש פתיחת עונה
+      </div>
+    </div>
+  );
+}
+
+function GameCard({ game }) {
+  const homeWin = game.sh > game.sa;
+  const isTechni = !!game.techni;
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 10, transition: 'transform 0.15s, border-color 0.15s', cursor: 'default' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'rgba(255,107,26,0.3)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; }}
+    >
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: homeWin ? '#e8edf5' : '#5a7a9a' }}>{game.home}</div>
+        {isTechni && homeWin && <div style={{ fontSize: 9, color: '#e05a5a', marginTop: 2 }}>🔴 {game.techni}</div>}
+      </div>
+      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 8, padding: '6px 10px', textAlign: 'center', minWidth: 70 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
+          <span style={{ fontWeight: 900, fontSize: 17, color: homeWin ? '#FF6B1A' : '#4a6a8a' }}>{game.sh}</span>
+          <span style={{ color: '#3a5a7a', fontSize: 12 }}>:</span>
+          <span style={{ fontWeight: 900, fontSize: 17, color: !homeWin ? '#FF6B1A' : '#4a6a8a' }}>{game.sa}</span>
+        </div>
+      </div>
+      <div style={{ textAlign: 'left' }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: !homeWin ? '#e8edf5' : '#5a7a9a' }}>{game.away}</div>
+        {isTechni && !homeWin && <div style={{ fontSize: 9, color: '#e05a5a', marginTop: 2 }}>🔴 {game.techni}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ===== PAGES =====
+function OverviewPage() {
+  const totalGames = 56;
+  const realGames = GAMES.filter(g => g.sh > 20 || g.sa > 20);
+  const allScores = realGames.flatMap(g => [
+    { score: g.sh, team: g.home, opp: g.away, date: g.date, round: g.round },
+    { score: g.sa, team: g.away, opp: g.home, date: g.date, round: g.round },
+  ]);
+  const topScore = allScores.reduce((a, b) => a.score > b.score ? a : b);
+  const topTotal = realGames.reduce((a, b) => (a.sh + a.sa) > (b.sh + b.sa) ? a : b);
+  const topMargin = realGames.reduce((a, b) => (b.sh - b.sa) > (a.sh - a.sa) ? b : a);
+  const worstDeficit = realGames.reduce((a, b) => (b.sh - b.sa) < (a.sh - a.sa) ? b : a);
+  const closestGames = realGames.filter(g => Math.abs(g.sh - g.sa) === 1);
+  const northLeader = NORTH_TABLE[0];
+  const southLeader = SOUTH_TABLE[0];
+
+  const records = [
+    { icon: '🏀', label: 'שיא סלים במשחק', value: `${topScore.score}`, sub: `${topScore.team} נגד ${topScore.opp}`, detail: `מחזור ${topScore.round} · ${topScore.date}`, color: '#FF6B1A' },
+    { icon: '🔢', label: 'שיא סלים משני הצדדים', value: `${topTotal.sh + topTotal.sa}`, sub: `${topTotal.home} ${topTotal.sh} – ${topTotal.sa} ${topTotal.away}`, detail: `מחזור ${topTotal.round} · ${topTotal.date}`, color: '#e0c97a' },
+    { icon: '💥', label: 'הפרש גדול ביותר', value: `+${topMargin.sh - topMargin.sa}`, sub: `${topMargin.home} נגד ${topMargin.away}`, detail: `מחזור ${topMargin.round} · ${topMargin.date}`, color: '#4ec97a' },
+    { icon: '📉', label: 'הפרש שלילי גדול ביותר', value: `${worstDeficit.sh - worstDeficit.sa}`, sub: `${worstDeficit.home} נגד ${worstDeficit.away}`, detail: `מחזור ${worstDeficit.round} · ${worstDeficit.date}`, color: '#e05a5a' },
+  ];
+
+  return (
+    <div>
+      <div style={S.pageTitle}>סקירה כללית</div>
+      <div style={S.pageSub}>עונת 2025–2026 · עד מחזור 8</div>
+
+      {/* Stats row */}
+      <div style={S.grid4}>
+        <StatPill value="15" label="קבוצות" icon="🏀" color="#FF6B1A" />
+        <StatPill value="8" label="מחזורים עד כה" icon="📆" color="#e0c97a" />
+        <StatPill value={totalGames} label="משחקי ליגה" icon="📊" color="#4ec97a" />
+        <StatPill value="14" label="מחזורי עונה" icon="🗓" color="#7a9aff" />
+      </div>
+
+      {/* Leaders */}
+      <div style={{ ...S.grid2, marginTop: 20 }}>
+        <div style={{ ...S.card, borderTop: '3px solid #e0c97a' }}>
+          <div style={{ padding: '14px 20px' }}>
+            <div style={{ fontSize: 11, color: '#5a7a9a', letterSpacing: 1, marginBottom: 8 }}>🥇 מוביל צפון</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#e0c97a' }}>{northLeader.name}</div>
+            <div style={{ fontSize: 13, color: '#8aaac8', marginTop: 4 }}>{northLeader.wins}נ / {northLeader.losses}ה · <span style={{ color: '#FF6B1A', fontWeight: 700 }}>{northLeader.pts} נקודות</span></div>
+          </div>
+        </div>
+        <div style={{ ...S.card, borderTop: '3px solid #e0c97a' }}>
+          <div style={{ padding: '14px 20px' }}>
+            <div style={{ fontSize: 11, color: '#5a7a9a', letterSpacing: 1, marginBottom: 8 }}>🥇 מוביל דרום</div>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#e0c97a' }}>{southLeader.name}</div>
+            <div style={{ fontSize: 13, color: '#8aaac8', marginTop: 4 }}>{southLeader.wins}נ / {southLeader.losses}ה · <span style={{ color: '#FF6B1A', fontWeight: 700 }}>{southLeader.pts} נקודות</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Season records */}
+      <div style={{ marginTop: 24 }}>
+        <div style={{ fontSize: 16, fontWeight: 800, color: '#e8edf5', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ background: 'linear-gradient(135deg,#FF6B1A,#cc4400)', borderRadius: 8, padding: '4px 8px', fontSize: 13 }}>🏆</span>
+          ביצועי שיא עונה
+        </div>
+        <div style={S.grid2}>
+          {records.map(r => (
+            <div key={r.label} style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.07)`, borderRadius: 14, padding: '18px 20px', position: 'relative', overflow: 'hidden', borderRight: `4px solid ${r.color}` }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>{r.icon}</div>
+              <div style={{ fontSize: 11, color: '#5a7a9a', letterSpacing: 0.5, marginBottom: 4 }}>{r.label}</div>
+              <div style={{ fontSize: 30, fontWeight: 900, color: r.color, lineHeight: 1, marginBottom: 6 }}>{r.value}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#c8d8e8' }}>{r.sub}</div>
+              <div style={{ fontSize: 11, color: '#5a7a9a', marginTop: 3 }}>{r.detail}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Additional season facts */}
+      <div style={{ marginTop: 20, ...S.card }}>
+        <div style={S.cardHeader}>📋 עובדות עונה</div>
+        <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#5a7a9a', marginBottom: 4 }}>משחקים שהוכרעו בסל אחד</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#7a9aff' }}>{closestGames.length}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: '#5a7a9a', marginBottom: 4 }}>קבוצה עם הכי הרבה סלים (סה"כ)</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#4ec97a' }}>ראשון "גפן" לציון</div>
+            <div style={{ fontSize: 12, color: '#5a7a9a' }}>589 סלים | ממוצע 73.6</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: '#5a7a9a', marginBottom: 4 }}>תוצאת גמר גביע</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#e0c97a' }}>טרם שוחק · 21.03.26</div>
+            <div style={{ fontSize: 12, color: '#5a7a9a' }}>ראשון "גפן" לציון vs גוטלמן</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TablesPage() {
+  return (
+    <div>
+      <div style={S.pageTitle}>טבלאות ליגה</div>
+      <div style={S.pageSub}>עדכני עד מחזור 8</div>
+      <div style={{ display: 'grid', gap: 24 }}>
+        <TableView data={NORTH_TABLE} title="טבלת צפון" icon="🏀" />
+        <TableView data={SOUTH_TABLE} title="טבלת דרום" icon="🏀" />
+      </div>
+    </div>
+  );
+}
+
+function ResultsPage() {
+  const [activeRound, setActiveRound] = useState(null);
+  const rounds = [...new Set(GAMES.map(g => g.round))].sort((a, b) => a - b);
+
+  const filteredGames = activeRound ? GAMES.filter(g => g.round === activeRound) : GAMES;
+  const groupedByRound = rounds.reduce((acc, r) => {
+    acc[r] = filteredGames.filter(g => g.round === r);
+    return acc;
+  }, {});
+
+  return (
+    <div>
+      <div style={S.pageTitle}>תוצאות משחקים</div>
+      <div style={S.pageSub}>מחזורים 1–8 · {GAMES.length} משחקים</div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        <button onClick={() => setActiveRound(null)}
+          style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)', background: activeRound === null ? '#FF6B1A' : 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+          הכל
+        </button>
+        {rounds.map(r => (
+          <button key={r} onClick={() => setActiveRound(r === activeRound ? null : r)}
+            style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.1)', background: activeRound === r ? '#FF6B1A' : 'rgba(255,255,255,0.05)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+            מחזור {r}
+          </button>
+        ))}
+      </div>
+
+      {rounds.filter(r => groupedByRound[r]?.length > 0).map(r => (
+        <div key={r} style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <div style={{ background: 'rgba(255,107,26,0.15)', border: '1px solid rgba(255,107,26,0.3)', borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, color: '#FF6B1A' }}>
+              מחזור {r} · {groupedByRound[r][0]?.date}
+            </div>
+            <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.05)' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
+            {groupedByRound[r].map((g, i) => <GameCard key={i} game={g} />)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CupPage() {
+  return (
+    <div>
+      <div style={S.pageTitle}>טורניר גביע</div>
+      <div style={S.pageSub}>עונת 2025–2026</div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        {CUP_ROUNDS.map(stage => (
+          <div key={stage.stage} style={S.card}>
+            <div style={{ ...S.cardHeader, flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+              <div>{stage.stage}</div>
+              <div style={{ fontSize: 11, color: '#4a6a8a', fontWeight: 400 }}>{stage.date}</div>
+            </div>
+            <div style={{ padding: '8px 0' }}>
+              {stage.matches.map((m, i) => (
+                <div key={i} style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  {m.upcoming ? (
+                    <div style={{ textAlign: 'center', padding: '8px 0' }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#e0c97a', marginBottom: 8 }}>🏆 גמר הגביע</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#e8edf5' }}>{m.home}</div>
+                      <div style={{ fontSize: 11, color: '#FF6B1A', margin: '4px 0' }}>נגד</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#e8edf5' }}>{m.away}</div>
+                      <div style={{ fontSize: 11, color: '#4a6a8a', marginTop: 6 }}>טרם שוחק</div>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: m.sh >= m.sa ? '#e8edf5' : '#5a7a9a' }}>{m.home}</span>
+                        <span style={{ fontWeight: 900, color: m.sh >= m.sa ? '#FF6B1A' : '#4a6a8a', fontSize: 14 }}>{m.sh}</span>
+                      </div>
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '3px 0' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '3px 0' }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: m.sa > m.sh ? '#e8edf5' : '#5a7a9a' }}>{m.away}</span>
+                        <span style={{ fontWeight: 900, color: m.sa > m.sh ? '#FF6B1A' : '#4a6a8a', fontSize: 14 }}>{m.sa}{m.techni ? ' 🔴' : ''}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UpcomingPage() {
+  return (
+    <div>
+      <div style={S.pageTitle}>משחקים קרובים</div>
+      <div style={S.pageSub}>מחזור 9 · 28.02.26</div>
+
+      <div style={{ ...S.card, marginBottom: 20 }}>
+        <div style={S.cardHeader}>📅 מחזור 9 – 28 בפברואר 2026</div>
+        <div style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 10 }}>
+          {UPCOMING.map((g, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ background: g.div === 'צפון' ? 'rgba(100,160,255,0.15)' : 'rgba(255,107,26,0.15)', border: `1px solid ${g.div === 'צפון' ? 'rgba(100,160,255,0.3)' : 'rgba(255,107,26,0.3)'}`, borderRadius: 8, padding: '4px 10px', fontSize: 11, fontWeight: 700, color: g.div === 'צפון' ? '#7aaaff' : '#FF6B1A', whiteSpace: 'nowrap' }}>
+                {g.div}
+              </div>
+              <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>
+                {g.home} <span style={{ color: '#4a6a8a', fontWeight: 400 }}>vs</span> {g.away}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ ...S.card }}>
+        <div style={S.cardHeader}>📋 לוח עונה שלם</div>
+        <div style={{ padding: 16 }}>
+          {[
+            { round: '1', date: '01.11.25', status: 'done' },
+            { round: '2', date: '08.11.25', status: 'done' },
+            { round: '3', date: '29.11.25', status: 'done' },
+            { round: '4', date: '20.12.25', status: 'done' },
+            { round: '5', date: '10.01.26', status: 'done' },
+            { round: '6', date: '24.01.26', status: 'done' },
+            { round: '7', date: '25.01.26', status: 'done' },
+            { round: '8', date: '21.02.26', status: 'done' },
+            { round: '9', date: '28.02.26', status: 'next' },
+            { round: '10', date: '14.03.26', status: 'future' },
+            { round: '11', date: '21.03.26', status: 'future' },
+            { round: '12', date: '10.04.26', status: 'future' },
+            { round: '13', date: '17.04.26', status: 'future' },
+            { round: '14', date: '24.04.26', status: 'future' },
+          ].map(item => (
+            <div key={item.round} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: item.status === 'done' ? 'rgba(78,201,122,0.2)' : item.status === 'next' ? 'rgba(255,107,26,0.3)' : 'rgba(255,255,255,0.05)', border: `2px solid ${item.status === 'done' ? '#4ec97a' : item.status === 'next' ? '#FF6B1A' : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: item.status === 'done' ? '#4ec97a' : item.status === 'next' ? '#FF6B1A' : '#4a6a8a', flexShrink: 0 }}>
+                {item.status === 'done' ? '✓' : item.round}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: item.status === 'done' ? '#5a7a9a' : item.status === 'next' ? '#fff' : '#8aaac8' }}>מחזור {item.round}</div>
+              <div style={{ fontSize: 13, color: '#4a6a8a' }}>{item.date}</div>
+              <div style={{ marginRight: 'auto', fontSize: 11, fontWeight: 600, color: item.status === 'done' ? '#4ec97a' : item.status === 'next' ? '#FF6B1A' : '#4a6a8a', background: item.status === 'done' ? 'rgba(78,201,122,0.1)' : item.status === 'next' ? 'rgba(255,107,26,0.1)' : 'transparent', borderRadius: 20, padding: '2px 10px' }}>
+                {item.status === 'done' ? 'הסתיים' : item.status === 'next' ? '◀ הבא' : 'עתידי'}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordsPage() {
+  const realGames = GAMES.filter(g => g.sh > 20 || g.sa > 20);
+  const allScores = realGames.flatMap(g => [
+    { score: g.sh, team: g.home, opp: g.away, date: g.date, round: g.round },
+    { score: g.sa, team: g.away, opp: g.home, date: g.date, round: g.round },
+  ]).sort((a, b) => b.score - a.score);
+
+  const topMargins = [...realGames].sort((a, b) => (b.sh - b.sa) - (a.sh - a.sa));
+  const worstDeficits = [...realGames].sort((a, b) => (a.sh - a.sa) - (b.sh - b.sa));
+
+  return (
+    <div>
+      <div style={S.pageTitle}>שיאי עונה</div>
+      <div style={S.pageSub}>ביצועים מצטיינים · עונת 2025–2026</div>
+
+      <div style={S.grid2}>
+        <div style={S.card}>
+          <div style={S.cardHeader}>🏀 שיאי ניקוד קבוצתי</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <th style={{ padding: '8px 14px', textAlign: 'right', color: '#4a6a8a', fontSize: 11 }}>קבוצה</th>
+                <th style={{ padding: '8px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 11 }}>סלים</th>
+                <th style={{ padding: '8px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 11 }}>נגד</th>
+                <th style={{ padding: '8px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 11 }}>מחזור</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allScores.slice(0, 8).map((s, i) => (
+                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <td style={{ padding: '9px 14px', fontWeight: 600, color: i === 0 ? '#e0c97a' : '#e8edf5' }}>{i === 0 && '🥇 '}{s.team}</td>
+                  <td style={{ padding: '9px 14px', textAlign: 'center', fontWeight: 900, fontSize: 16, color: '#FF6B1A' }}>{s.score}</td>
+                  <td style={{ padding: '9px 14px', textAlign: 'center', color: '#5a7a9a', fontSize: 12 }}>{s.opp}</td>
+                  <td style={{ padding: '9px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 12 }}>מ'{s.round}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={S.card}>
+          <div style={S.cardHeader}>💥 הפרשים גבוהים</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <th colSpan={3} style={{ padding: '8px 14px', textAlign: 'right', color: '#4a6a8a', fontSize: 11 }}>מנצח · תוצאה · מפסיד</th>
+                <th style={{ padding: '8px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 11 }}>הפרש</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topMargins.slice(0, 8).map((g, i) => {
+                const homeWins = g.sh > g.sa;
+                const winTeam = homeWins ? g.home : g.away;
+                const loseTeam = homeWins ? g.away : g.home;
+                const winScore = homeWins ? g.sh : g.sa;
+                const loseScore = homeWins ? g.sa : g.sh;
+                const diff = winScore - loseScore;
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td colSpan={3} style={{ padding: '9px 14px', fontSize: 12 }}>
+                      {i === 0 && <span style={{ color: '#e0c97a' }}>🥇 </span>}
+                      <span style={{ fontWeight: 700, color: i === 0 ? '#e0c97a' : '#e8edf5' }}>{winTeam}</span>
+                      <span style={{ fontWeight: 900, color: '#FF6B1A', margin: '0 14px' }}>{winScore}</span>
+                      <span style={{ color: '#4a6a8a' }}>{loseTeam}</span>
+                      <span style={{ fontWeight: 900, color: '#5a7a9a', margin: '0 14px' }}>{loseScore}</span>
+                    </td>
+                    <td style={{ padding: '9px 14px', textAlign: 'center', fontWeight: 900, color: '#4ec97a', whiteSpace: 'nowrap' }}>+{diff}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={S.card}>
+          <div style={S.cardHeader}>😰 תבוסות גדולות</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <th colSpan={3} style={{ padding: '8px 14px', textAlign: 'right', color: '#4a6a8a', fontSize: 11 }}>מפסיד · תוצאה · מנצח</th>
+                <th style={{ padding: '8px 14px', textAlign: 'center', color: '#4a6a8a', fontSize: 11 }}>הפרש</th>
+              </tr>
+            </thead>
+            <tbody>
+              {worstDeficits.slice(0, 8).map((g, i) => {
+                const homeWins = g.sh > g.sa;
+                const loseTeam = homeWins ? g.away : g.home;
+                const winTeam = homeWins ? g.home : g.away;
+                const loseScore = homeWins ? g.sa : g.sh;
+                const winScore = homeWins ? g.sh : g.sa;
+                const diff = winScore - loseScore;
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <td colSpan={3} style={{ padding: '9px 14px', fontSize: 12 }}>
+                      <span style={{ fontWeight: 700, color: '#e05a5a' }}>{loseTeam}</span>
+                      <span style={{ fontWeight: 900, color: '#5a7a9a', margin: '0 14px' }}>{loseScore}</span>
+                      <span style={{ color: '#4a6a8a' }}>{winTeam}</span>
+                      <span style={{ fontWeight: 900, color: '#4ec97a', margin: '0 14px' }}>{winScore}</span>
+                    </td>
+                    <td style={{ padding: '9px 14px', textAlign: 'center', fontWeight: 900, color: '#e05a5a', whiteSpace: 'nowrap' }}>-{diff}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div style={S.card}>
+          <div style={S.cardHeader}>⚡ משחקים צמודים (הפרש של 1)</div>
+          <div style={{ padding: 12 }}>
+            {realGames.filter(g => Math.abs(g.sh - g.sa) === 1).map((g, i) => (
+              <div key={i} style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontSize: 12, color: '#4a6a8a', whiteSpace: 'nowrap' }}>מ'{g.round}</div>
+                <div style={{ flex: 1, fontSize: 13 }}>
+                  <span style={{ fontWeight: 600, color: g.sh > g.sa ? '#e8edf5' : '#5a7a9a' }}>{g.home}</span>
+                  <span style={{ fontWeight: 900, color: g.sh > g.sa ? '#FF6B1A' : '#5a7a9a', margin: '0 14px' }}>{g.sh}</span>
+                  <span style={{ fontWeight: 600, color: g.sa > g.sh ? '#e8edf5' : '#5a7a9a' }}>{g.away}</span>
+                  <span style={{ fontWeight: 900, color: g.sa > g.sh ? '#FF6B1A' : '#5a7a9a', margin: '0 0 0 14px' }}>{g.sa}</span>
+                </div>
+                <div style={{ background: 'rgba(255,107,26,0.15)', color: '#FF6B1A', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>הפרש 1</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== MAIN APP =====
+const PAGES = [
+  { id: 'overview', label: 'סקירה כללית', icon: '🏠' },
+  { id: 'tables', label: 'טבלאות ליגה', icon: '📊' },
+  { id: 'results', label: 'תוצאות משחקים', icon: '⚡' },
+  { id: 'cup', label: 'טורניר גביע', icon: '🏆' },
+  { id: 'upcoming', label: 'לוח משחקים', icon: '📅' },
+  { id: 'records', label: 'שיאי עונה', icon: '🌟' },
+];
+
+function App() {
+  const [page, setPage] = useState('overview');
+
+  const renderPage = () => {
+    switch (page) {
+      case 'overview': return <OverviewPage />;
+      case 'tables': return <TablesPage />;
+      case 'results': return <ResultsPage />;
+      case 'cup': return <CupPage />;
+      case 'upcoming': return <UpcomingPage />;
+      case 'records': return <RecordsPage />;
+      default: return <OverviewPage />;
+    }
+  };
+
+  return (
+    <div style={S.app}>
+      {/* Sidebar */}
+      <div style={S.sidebar}>
+        <div style={S.logo}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <img src="data:image/jpeg;base64,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H1xXlg0u41i5kkRCxzk4r1HxMm/THHtWH4LtwksmR1rClPki5IqSu7M89m054JCjqQw7GoxbbXBx0NegeMNJjjnEqLgt1xXMG156V3Qq88bmTjZnofhS4+06PGvoMV5x4x00w6vKduAxzXceCZwsLRHqKpeObDdMkoXr3rjpvkqmkleJ5sbP2pptPat02ntUZtPavS5zCxiG09q0vDlsV1m1OOjipzae1XtCttuq25xj5hSlP3WCWp69H9xfpRQn3F+lFeCdxyvjWHzPJ4rlRaH0rtvE8XmeXWELX2rvpytBGMldmQLT2pwtD6VrC1PpTxa+1ac5NjU8IReXG/FL4pi8xo8jIzUFjdSWIIRetOvLmS9xvXpXK0+e5fSwS6NA+nxyIgDDrSX+jRfYEkjQBu9SR3ciW/lYG2n/AGuRoPKIG2l7yHoUrXwybmEOGxmtbStAWwk3k5NRW9/LBGEC8VIdUmx92lJyY0kh/iF/9F2DvVHwvCY3fjFNnMly2X5qSzke0JKjrTt7thdbkniSDz2jX1NV4/CayIG3dammne7kXcOhrcjbbAPUCp5pRVkOyZmaZoI06UurZpPE1uJbLpyKSXVZlkIAGBVW7vpbqPYy8UJSvdhpscqbT2pptD6VtG19qabX2rsUzKxiG0PpVrSbbbqEJx/EKvG19qnsLbbeRnHehz0BI7NfuiilHQUV5p0Gbq8Xm7fas0WntW9cxeZjioBamtYysiWjJFr7U4WvtWr9mNL9m9qfOKxlC1pwtvatP7OaX7P7UuYLGaLb6Uot8dq0hB7UvkUcw7GaLelFvWj5FAgxS5gsZ/2b2pPs3tWl5NJ5NHMFjO+z4PFP/eYxnir3kUeRRcDLNuT9aabatUwUn2f2p8wWMo2p9KabWtb7PR9m9qfOKxkG19qfbW22dD71p/ZjSpblXBo5wsWx0ooorEsWkxS0UAJijFLRQAmKMUtFACYoxS0UAJijFLRQAmKMUtFACYoxS0UAJijFLRQAmKMUtFACYoxS0UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/9k=" style={{ height:44, width:'auto', borderRadius:6 }} alt="לוגו ליגת ליבי" />
+            <div>
+              <div style={S.logoTitle}>ליגת ליבי</div>
+              <div style={S.logoSub}>עונת 2025–2026</div>
+            </div>
+          </div>
+        </div>
+        <nav style={{ flex: 1 }}>
+          {PAGES.map(p => (
+            <div key={p.id} style={S.navItem(page === p.id)} onClick={() => setPage(p.id)}>
+              <span style={S.navIcon}>{p.icon}</span>
+              <span>{p.label}</span>
+            </div>
+          ))}
+        </nav>
+        <div style={{ padding: '0 20px', fontSize: 11, color: '#2a4a6a' }}>
+          מחזור נוכחי: 8/14<br />
+          עדכון: פבר׳ 2026
+        </div>
+      </div>
+
+      {/* Main content */}
+      <main style={S.main}>
+        {renderPage()}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
